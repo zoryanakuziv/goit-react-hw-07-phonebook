@@ -1,9 +1,8 @@
-import React from "react";
-import { FilterInput } from "./Filter.styled";
-import { useDispatch, useSelector } from "react-redux";
-
-import { filterContacts } from "../../redux/contacts/contacts-slice";
-import { filterSelector } from "../../redux/contacts/contacts-selectors";
+import React from 'react';
+import { FilterInput } from './Filter.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { filterContacts } from '../../redux/filter/filter-actions';
+import { filterSelector } from '../../redux/filter/filter-selectors';
 
 const Filter = () => {
   const filter = useSelector(filterSelector);
@@ -15,9 +14,7 @@ const Filter = () => {
       <FilterInput
         type="text"
         value={filter}
-        onChange={(event) =>
-          dispatch(filterContacts(event.currentTarget.value))
-        }
+        onChange={event => dispatch(filterContacts(event.currentTarget.value))}
         name="filter"
         title=""
         required

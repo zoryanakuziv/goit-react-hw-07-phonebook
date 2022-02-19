@@ -1,23 +1,26 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { nanoid } from "nanoid";
-import { Label, FormInput, Button } from "./Form.styled";
-import { addContact } from "../../redux/contacts/contacts-slice";
-import { contactsSelector } from "../../redux/contacts/contacts-selectors";
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
+import { Label, FormInput, Button } from './Form.styled';
+import {
+  useCreateContactMutation,
+  useFetchContactsQuery,
+} from '../../redux/contacts/contacts-api';
+import { Loader } from '../loader/Loader';
 
 export default function Form() {
-  const [name, setName] = useState("");
-  const [number, setNumber] = useState("");
-  const dispatch = useDispatch();
-  const contacts = useSelector(contactsSelector);
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-  const handleChange = (event) => {
+  const [addContact, { isLoading }] = useCreateContactMutation();
+  const { data } = useFetchContactsQuery();
+
+  const handleChange = event => {
     const { name, value } = event.currentTarget;
     switch (name) {
-      case "name":
+      case 'name':
         setName(value);
         break;
-      case "number":
+      case 'number':
         setNumber(value);
         break;
       default:
@@ -25,21 +28,24 @@ export default function Form() {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async event => {
     event.preventDefault();
-    if (
-      contacts.find(
-        (contact) => contact.name.toLowerCase() === name.toLowerCase()
-      )
-    )
+    if (data.find(contact => contact.name.toLowerCase() === name.toLowerCase()))
       return alert(`${name} is already in contacts.`);
-    dispatch(addContact({ id: nanoid(), name, number }));
-    //onSubmit({  name, number });
+    try {
+      await addContact({ name, number });
+      toast.success('The contact has been added to the phonebook', {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    } catch (error) {
+      toast.error("The contact can't be added to the phonebook");
+    }
     reset();
   };
+
   const reset = () => {
-    setName("");
-    setNumber("");
+    setName('');
+    setNumber('');
   };
 
   return (
@@ -68,7 +74,10 @@ export default function Form() {
           required
         />
       </Label>
-      <Button type="submit">Add contact</Button>
+      <Button type="submit" disabled={isLoading}>
+        {isLoading && <Loader />}
+        Add contact
+      </Button>
     </form>
   );
 }
